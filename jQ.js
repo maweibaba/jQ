@@ -292,10 +292,6 @@
     });
 
 
-
-
-
-
     //样式操作模块
     jQ.fn.extend({
        css:function(name,value){
@@ -526,6 +522,200 @@
 
 
     //动画模块
+    var easingFnList = {
+        linear: function(x, t, b, c, d) {
+            return t * (c - b) / d;
+        },
+        swing: function(x, t, b, c, d) {
+            var a = 2 * (c - b) / (d * d),
+                v_0 = a * d;
+            return v_0 * t - 1/2 * a * t * t;
+        },
+        easeinQuad: function (x, t, b, c, d) {
+            return c*(t/=d)*t + b;
+        },
+        easeoutQuad: function (x, t, b, c, d) {
+            return -c *(t/=d)*(t-2) + b;
+        },
+        easeinoutQuad: function (x, t, b, c, d) {
+            if ((t/=d/2) < 1) return c/2*t*t + b;
+            return -c/2 * ((--t)*(t-2) - 1) + b;
+        },
+        easeinCubic: function (x, t, b, c, d) {
+            return c*(t/=d)*t*t + b;
+        },
+        easeoutCubic: function (x, t, b, c, d) {
+            return c*((t=t/d-1)*t*t + 1) + b;
+        },
+        easeinoutCubic: function (x, t, b, c, d) {
+            if ((t/=d/2) < 1) return c/2*t*t*t + b;
+            return c/2*((t-=2)*t*t + 2) + b;
+        },
+        easeinQuart: function (x, t, b, c, d) {
+            return c*(t/=d)*t*t*t + b;
+        },
+        easeoutQuart: function (x, t, b, c, d) {
+            return -c * ((t=t/d-1)*t*t*t - 1) + b;
+        },
+        easeinoutQuart: function (x, t, b, c, d) {
+            if ((t/=d/2) < 1) return c/2*t*t*t*t + b;
+            return -c/2 * ((t-=2)*t*t*t - 2) + b;
+        },
+        easeinQuint: function (x, t, b, c, d) {
+            return c*(t/=d)*t*t*t*t + b;
+        },
+        easeoutQuint: function (x, t, b, c, d) {
+            return c*((t=t/d-1)*t*t*t*t + 1) + b;
+        },
+        easeinoutQuint: function (x, t, b, c, d) {
+            if ((t/=d/2) < 1) return c/2*t*t*t*t*t + b;
+            return c/2*((t-=2)*t*t*t*t + 2) + b;
+        },
+        easeinSine: function (x, t, b, c, d) {
+            return -c * Math.cos(t/d * (Math.PI/2)) + c + b;
+        },
+        easeoutSine: function (x, t, b, c, d) {
+            return c * Math.sin(t/d * (Math.PI/2)) + b;
+        },
+        easeinoutSine: function (x, t, b, c, d) {
+            return -c/2 * (Math.cos(Math.PI*t/d) - 1) + b;
+        },
+        easeinExpo: function (x, t, b, c, d) {
+            return (t==0) ? b : c * Math.pow(2, 10 * (t/d - 1)) + b;
+        },
+        easeoutExpo: function (x, t, b, c, d) {
+            return (t==d) ? b+c : c * (-Math.pow(2, -10 * t/d) + 1) + b;
+        },
+        easeinoutExpo: function (x, t, b, c, d) {
+            if (t==0) return b;
+            if (t==d) return b+c;
+            if ((t/=d/2) < 1) return c/2 * Math.pow(2, 10 * (t - 1)) + b;
+            return c/2 * (-Math.pow(2, -10 * --t) + 2) + b;
+        },
+        easeinCirc: function (x, t, b, c, d) {
+            return -c * (Math.sqrt(1 - (t/=d)*t) - 1) + b;
+        },
+        easeoutCirc: function (x, t, b, c, d) {
+            return c * Math.sqrt(1 - (t=t/d-1)*t) + b;
+        },
+        easeinoutCirc: function (x, t, b, c, d) {
+            if ((t/=d/2) < 1) return -c/2 * (Math.sqrt(1 - t*t) - 1) + b;
+            return c/2 * (Math.sqrt(1 - (t-=2)*t) + 1) + b;
+        },
+        easeinElastic: function (x, t, b, c, d, a, p) {
+            if (t==0) return b;  if ((t/=d)==1) return b+c;  if (!p) p=d*.3;
+            if (a < Math.abs(c)) { a=c; var s=p/4; }
+            else var s = p/(2*Math.PI) * Math.asin (c/a);
+            return -(a*Math.pow(2,10*(t-=1)) * Math.sin( (t*d-s)*(2*Math.PI)/p )) + b;
+        },
+        easeoutElastic: function (x, t, b, c, d, a, p) {
+            if (t==0) return b;  if ((t/=d)==1) return b+c;  if (!p) p=d*.3;
+            if (a < Math.abs(c)) { a=c; var s=p/4; }
+            else var s = p/(2*Math.PI) * Math.asin (c/a);
+            return a*Math.pow(2,-10*t) * Math.sin( (t*d-s)*(2*Math.PI)/p ) + c + b;
+        },
+        easeinoutElastic: function (x, t, b, c, d, a, p) {
+            if (t==0) return b;  if ((t/=d/2)==2) return b+c;  if (!p) p=d*(.3*1.5);
+            if (a < Math.abs(c)) { a=c; var s=p/4; }
+            else var s = p/(2*Math.PI) * Math.asin (c/a);
+            if (t < 1) return -.5*(a*Math.pow(2,10*(t-=1)) * Math.sin( (t*d-s)*(2*Math.PI)/p )) + b;
+            return a*Math.pow(2,-10*(t-=1)) * Math.sin( (t*d-s)*(2*Math.PI)/p )*.5 + c + b;
+        },
+        easeinBack: function (x, t, b, c, d, s) {
+            if (s == undefined) s = 1.70158;
+            return c*(t/=d)*t*((s+1)*t - s) + b;
+        },
+        easeoutBack: function (x, t, b, c, d, s) {
+            if (s == undefined) s = 1.70158;
+            return c*((t=t/d-1)*t*((s+1)*t + s) + 1) + b;
+        },
+        easeinoutBack: function (x, t, b, c, d, s) {
+            if (s == undefined) s = 1.70158;
+            if ((t/=d/2) < 1) return c/2*(t*t*(((s*=(1.525))+1)*t - s)) + b;
+            return c/2*((t-=2)*t*(((s*=(1.525))+1)*t + s) + 2) + b;
+        },
+        easeoutBounce: function (x, t, b, c, d) {
+            if ((t/=d) < (1/2.75)) {
+                return c*(7.5625*t*t) + b;
+            } else if (t < (2/2.75)) {
+                return c*(7.5625*(t-=(1.5/2.75))*t + .75) + b;
+            } else if (t < (2.5/2.75)) {
+                return c*(7.5625*(t-=(2.25/2.75))*t + .9375) + b;
+            } else {
+                return c*(7.5625*(t-=(2.625/2.75))*t + .984375) + b;
+            }
+        }
+    };
+
+    //维护一个键值对
+    var targetKV = {
+      left: "offsetLeft",
+      top: "offsetTop",
+      width: "offsetWidth",
+       height: "offsetHeight"
+    };
+
+    //用来获取起始位置
+    var getStartPosition = function(node,target){
+        var o = {};
+        for(var k in target){
+            o[k] = node[targetKV[k]];
+        }
+        return o;
+    };
+
+    //用来获取总的距离
+    var getTotalDistance = function(node,target){
+        var o = {};
+        for(var k in target){
+            o[k] =target[k] - node[targetKV[k]];
+        }
+        return o;
+    };
+
+    //用来获取已经经过的距离
+    var getTween = function(x, t, startPositions, target, duration, easing){
+        var o = {};
+        for(var k in target){
+            o[k] =easingFnList[easing](null, t, startPositions[k], target[k],duration);
+        }
+        return o;
+    };
+
+    //用来设置样式
+    var setStyle = function(node, target, startPositions, tweens){
+        for(var k in target){
+           node.style[k] = startPositions[k] + tweens[k] + "px";
+        }
+    };
+
+    jQ.fn.extend({
+       animate:function(target, duration, easing){
+           var node  = this[0];
+
+           var startPositions = getStartPosition(node,target),
+              totalDistance = getTotalDistance(node, target),
+               startTime = +new Date,
+               passingTime = 0,
+               timerId = null,
+               tweens = 0;
+           var play = function(){
+               passingTime = +new Date - startTime;
+               if(passingTime >= duration){
+                   tweens = totalDistance;
+                   clearInterval(timerId);
+               }else {
+                   tweens = getTween(null, passingTime, startPositions, target, duration, easing);
+               }
+               setStyle(node, target, startPositions, tweens);
+           };
+
+           play();
+           timerId = setInterval(play, 20);
+
+       }
+    });
+
 
 
     //选择器模块
